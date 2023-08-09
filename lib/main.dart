@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lottie/lottie.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 void main() => runApp(MyApp());
 
@@ -68,21 +69,40 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Color(0xFFFF5F42), // 修改AppBar的背景颜色
       ),
       drawer: Drawer(
-        child: ListView.builder(
-          padding: EdgeInsets.only(top: 60.0),
-          itemCount: menus.length,
-          itemBuilder: (context, index) {
-            return ListTile(
-              title: Text(menus[index]['name'],
-                  style: TextStyle(fontSize: textSizePrice)),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                padding: EdgeInsets.only(top: 60.0),
+                itemCount: menus.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(menus[index]['name'],
+                        style: TextStyle(fontSize: textSizePrice)),
+                    onTap: () {
+                      setState(() {
+                        selectedMenuIndex = index;
+                      });
+                      Navigator.pop(context);
+                    },
+                  );
+                },
+              ),
+            ),
+            ListTile(
+              title: Text("隱私權政策",
+                  style: TextStyle(
+                      fontSize: textSizePrice, color: Colors.blueGrey)),
+              trailing: Icon(Icons.navigate_next),
               onTap: () {
-                setState(() {
-                  selectedMenuIndex = index;
-                });
-                Navigator.pop(context);
+                Navigator.pop(context); // 關閉抽屜
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PrivacyPolicyPage()),
+                );
               },
-            );
-          },
+            ),
+          ],
         ),
       ),
       body: Padding(
@@ -295,6 +315,53 @@ class _SplashScreenState extends State<SplashScreen>
                   MaterialPageRoute(builder: (context) => MyHomePage()),
                 ));
         },
+      ),
+    );
+  }
+}
+
+class PrivacyPolicyPage extends StatefulWidget {
+  @override
+  _PrivacyPolicyPageState createState() => _PrivacyPolicyPageState();
+}
+
+class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
+  String? _privacyPolicyContent;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPrivacyPolicy();
+  }
+
+  Future<void> _fetchPrivacyPolicy() async {
+    final response = await http
+        .get(Uri.parse('https://wingx.shop/api/get_policy/1')); // 替换为您的隐私策略URL
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      setState(() {
+        _privacyPolicyContent = responseData['content']; // 提取content字段
+      });
+    } else {
+      setState(() {
+        _privacyPolicyContent = 'Failed to load privacy policy.';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('隱私權政策'),
+        backgroundColor: Color(0xFFFF5F42),
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16.0),
+        child: _privacyPolicyContent != null
+            ? Html(data: _privacyPolicyContent!)
+            : CircularProgressIndicator(), // 在加载内容时显示一个加载指示器
       ),
     );
   }
