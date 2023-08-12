@@ -5,6 +5,7 @@ import 'package:wingx_shop/utils/splash_screen.dart';
 import 'package:wingx_shop/utils/detail_page.dart';
 import 'package:wingx_shop/utils/privacy.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 void main() async {
   await dotenv.load();
   runApp(MyApp());
@@ -69,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('寵物用品'),
-        backgroundColor:const Color(0xFFFF5F42), // 修改AppBar的背景颜色
+        backgroundColor: const Color(0xFFFF5F42), // 修改AppBar的背景颜色
       ),
       drawer: Drawer(
         child: Column(
@@ -174,4 +175,3 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-
