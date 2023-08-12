@@ -4,8 +4,11 @@ import 'package:http/http.dart' as http;
 import 'package:wingx_shop/utils/splash_screen.dart';
 import 'package:wingx_shop/utils/detail_page.dart';
 import 'package:wingx_shop/utils/privacy.dart';
-
-void main() => runApp(MyApp());
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+void main() async {
+  await dotenv.load();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
