@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:wingx_shop/utils/splash_screen.dart';
 import 'package:wingx_shop/utils/detail_page.dart';
 import 'package:wingx_shop/utils/privacy.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:dio/dio.dart';
 
+Dio dio = Dio();
 void main() async {
-  await dotenv.load();
   runApp(MyApp());
 }
 
@@ -40,11 +40,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> loadJsonData() async {
-    final response =
-        await http.get(Uri.parse('https://wingx.shop/api/product/order'));
+    final response = await dio.get('https://wingx.shop/api/product/order');
     if (response.statusCode == 200) {
       setState(() {
-        menus = jsonDecode(response.body);
+        menus = jsonDecode(response.data);
       });
     } else {
       throw Exception('Failed to load data');
@@ -71,6 +70,17 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: const Text('寵物用品'),
         backgroundColor: const Color(0xFFFF5F42), // 修改AppBar的背景颜色
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.login),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+              );
+            },
+          )
+        ],
       ),
       drawer: Drawer(
         child: Column(
@@ -171,6 +181,80 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               )
             : Container(),
+      ),
+    );
+  }
+}
+
+class User {
+  final String name;
+  final String email;
+  final String password;
+
+  User({required this.name, required this.email, required this.password});
+}
+
+class AuthService {
+  User? currentUser;
+
+  Future<bool> login(String email, String password) {
+    // 這裡只是一個示範，實際上你可能需要到後端伺服器驗證使用者資訊
+    if (email == "demo@example.com" && password == "password") {
+      currentUser = User(name: "Demo User", email: email, password: password);
+      return Future.value(true);
+    }
+    return Future.value(false);
+  }
+}
+
+class LoginPage extends StatefulWidget {
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final AuthService authService = AuthService();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("登入"),
+        backgroundColor: const Color(0xFFFF5F42),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: "Email"),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: passwordController,
+              decoration: const InputDecoration(labelText: "密碼"),
+              obscureText: true, // 輸入密碼會隱藏文字
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              child: const Text("登入"),
+              onPressed: () async {
+                bool success = await authService.login(
+                  emailController.text,
+                  passwordController.text,
+                );
+                if (success) {
+                  Navigator.pop(context);
+                } else {
+                  // 處理登入失敗
+                }
+              },
+            )
+          ],
+        ),
       ),
     );
   }

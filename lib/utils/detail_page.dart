@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+// import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+Dio dio = Dio();
 
 class DetailPage extends StatefulWidget {
   final dynamic product;
@@ -26,10 +29,10 @@ class _DetailPageState extends State<DetailPage> {
     int productId = widget.product['id'];
 
     // 替换为你的 API URL
-    final response = await http.get(
-        Uri.parse('https://wingx.shop/api/product/order/image/$productId'));
+    final response =
+        await dio.get('https://wingx.shop/api/product/order/image/$productId');
     if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
+      var data = jsonDecode(response.data);
       setState(() {
         // 根据你的 JSON 结构来获取图片的 URL
         imageUrls =
@@ -95,7 +98,8 @@ class _DetailPageState extends State<DetailPage> {
                   const SizedBox(height: 23),
                   Text(
                     widget.product['name'],
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
                   Text(
